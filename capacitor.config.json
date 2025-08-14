@@ -1,0 +1,9 @@
+{
+  "appId": "com.gestaoconsultas.app",
+  "appName": "Gestão Consultas",
+  "webDir": "apps/web/dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "cleartext": false
+  }
+}
