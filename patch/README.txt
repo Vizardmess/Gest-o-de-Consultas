@@ -1,1 +1,0 @@
-Colar o conteúdo desta pasta no teu repositório (apps/api, apps/web).

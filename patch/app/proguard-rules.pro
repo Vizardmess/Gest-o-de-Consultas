@@ -1,5 +1,0 @@
--keep class com.getcapacitor.** { *; }
--keep class com.google.android.gms.** { *; }
--keepclassmembers class * { @android.webkit.JavascriptInterface <methods>; }
--dontwarn okhttp3.**
--dontwarn okio.**
