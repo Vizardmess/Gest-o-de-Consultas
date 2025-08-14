@@ -1,0 +1,59 @@
+name: Android Starter — Debug APK (fix lockless)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]   # troca se a tua branch não for "main"
+
+jobs:
+  build-debug-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          # (sem cache npm para não reclamar do lock)
+
+      - name: Install deps
+        run: |
+          npm i -g npm@^10
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ] || [ -f yarn.lock ]; then
+            echo "Lock file encontrado → npm ci"
+            npm ci
+          else
+            echo "Sem lock file → npm install"
+            npm install --no-audit --no-fund
+          fi
+
+      - name: Build web
+        run: npm run build -w @app/web || npm run build --workspace=@app/web
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Add & Sync Android (inside apps/web)
+        run: |
+          cd apps/web
+          npx cap add android || true
+          npx cap sync android
+
+      - name: Assemble Debug APK
+        run: |
+          cd apps/web/android
+          chmod +x ./gradlew || true
+          ./gradlew --no-daemon :app:assembleDebug
+
+      - name: List outputs (debug)
+        run: |
+          cd apps/web/android/app/build/outputs
+          echo "=== TREE ==="
+          find . -maxdepth 4 -type f | sed 's|^|./outputs/|'
+          ls -lah ./apk/debug || true
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
